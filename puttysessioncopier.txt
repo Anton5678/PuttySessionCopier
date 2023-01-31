@@ -1,0 +1,188 @@
+// Decompiled with JetBrains decompiler
+// Type: PuttyConfig.Form1
+// Assembly: PuttyConfig, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+
+
+
+using Microsoft.Win32;
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace PuttyConfig
+{
+  public class Form1 : Form
+  {
+    private static string copyright = "(c) Anton";
+    private RegistryKey pkey;
+    private RegistryKey skey;
+    private IContainer components;
+    private Button button1;
+    private TextBox textBox1;
+    private ListBox lb_sessions;
+    private ListBox lb_keys;
+    private ListBox lb_slaves;
+    private Button button3;
+    private Label label1;
+    private Label label2;
+    private Label label3;
+
+    public Form1()
+    {
+      this.InitializeComponent();
+    }
+
+    private void button1_Click_1(object sender, EventArgs e)
+    {
+      this.pkey = Registry.CurrentUser.OpenSubKey("Software\\SimonTatham\\PuTTY\\Sessions", true);
+      foreach (string subKeyName in this.pkey.GetSubKeyNames())
+      {
+        this.lb_sessions.Items.Add((object) subKeyName);
+        this.lb_slaves.Items.Add((object) subKeyName);
+      }
+    }
+
+    private void lb_sessions_SelectedIndexChanged_1(object sender, EventArgs e)
+    {
+      this.skey = this.pkey.OpenSubKey((string) this.lb_sessions.SelectedItem, true);
+      string[] valueNames = this.skey.GetValueNames();
+      int index1 = 0;
+      this.lb_keys.SelectedItems.Clear();
+      this.lb_keys.Items.Clear();
+      foreach (string str in valueNames)
+      {
+        this.lb_keys.Items.Add((object) str);
+        if (str != "HostName" && str != "PortNumber" && (str != "PortForwardings" && str != "PublicKeyFile") && str != "UserName")
+          this.lb_keys.SetSelected(index1, true);
+        ++index1;
+      }
+      for (int index2 = 0; index2 < this.lb_slaves.Items.Count; ++index2)
+      {
+        if (this.lb_sessions.SelectedIndex == index2)
+          this.lb_slaves.SetSelected(index2, false);
+        else
+          this.lb_slaves.SetSelected(index2, true);
+      }
+    }
+
+    private void lb_keys_SelectedIndexChanged(object sender, EventArgs e)
+    {
+    }
+
+    private void button3_Click(object sender, EventArgs e)
+    {
+      string selectedItem = (string) this.lb_sessions.SelectedItem;
+      RegistryKey currentUser = Registry.CurrentUser;
+      RegistryKey registryKey1 = currentUser.OpenSubKey("Software\\SimonTatham\\PuTTY\\Sessions\\" + selectedItem, true);
+      int num1 = 0;
+      for (int index1 = 0; index1 < this.lb_slaves.Items.Count; ++index1)
+      {
+        if (this.lb_slaves.GetSelected(index1))
+        {
+          RegistryKey registryKey2 = currentUser.OpenSubKey("Software\\SimonTatham\\PuTTY\\Sessions\\" + this.lb_slaves.Items[index1], true);
+          for (int index2 = 0; index2 < this.lb_keys.Items.Count; ++index2)
+          {
+            if (this.lb_keys.GetSelected(index2))
+              registryKey2.SetValue((string) this.lb_keys.Items[index2], registryKey1.GetValue((string) this.lb_keys.Items[index2]));
+          }
+          ++num1;
+        }
+      }
+      int num2 = (int) MessageBox.Show((IWin32Window) this, "Copied " + (object) num1 + " sessions!", "Result\r\n");
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+      if (disposing && this.components != null)
+        this.components.Dispose();
+      base.Dispose(disposing);
+    }
+
+    private void InitializeComponent()
+    {
+      this.button1 = new Button();
+      this.textBox1 = new TextBox();
+      this.lb_sessions = new ListBox();
+      this.lb_keys = new ListBox();
+      this.lb_slaves = new ListBox();
+      this.button3 = new Button();
+      this.label1 = new Label();
+      this.label2 = new Label();
+      this.label3 = new Label();
+      this.SuspendLayout();
+      this.button1.Location = new Point(12, 12);
+      this.button1.Name = "button1";
+      this.button1.Size = new Size(75, 23);
+      this.button1.TabIndex = 0;
+      this.button1.Text = "Read";
+      this.button1.UseVisualStyleBackColor = true;
+      this.button1.Click += new EventHandler(this.button1_Click_1);
+      this.textBox1.Location = new Point(93, 12);
+      this.textBox1.Name = "textBox1";
+      this.textBox1.Size = new Size(519, 20);
+      this.textBox1.TabIndex = 1;
+      this.textBox1.Text = "HKCU\\Software\\SimonTatham\\PuTTY\\Sessions";
+      this.lb_sessions.FormattingEnabled = true;
+      this.lb_sessions.Location = new Point(12, 54);
+      this.lb_sessions.Name = "lb_sessions";
+      this.lb_sessions.Size = new Size(153, 537);
+      this.lb_sessions.TabIndex = 2;
+      this.lb_sessions.SelectedIndexChanged += new EventHandler(this.lb_sessions_SelectedIndexChanged_1);
+      this.lb_keys.FormattingEnabled = true;
+      this.lb_keys.Location = new Point(171, 54);
+      this.lb_keys.Name = "lb_keys";
+      this.lb_keys.SelectionMode = SelectionMode.MultiSimple;
+      this.lb_keys.Size = new Size(257, 537);
+      this.lb_keys.TabIndex = 3;
+      this.lb_keys.SelectedIndexChanged += new EventHandler(this.lb_keys_SelectedIndexChanged);
+      this.lb_slaves.FormattingEnabled = true;
+      this.lb_slaves.Location = new Point(434, 54);
+      this.lb_slaves.Name = "lb_slaves";
+      this.lb_slaves.SelectionMode = SelectionMode.MultiSimple;
+      this.lb_slaves.Size = new Size(178, 537);
+      this.lb_slaves.TabIndex = 4;
+      this.button3.Location = new Point(12, 597);
+      this.button3.Name = "button3";
+      this.button3.Size = new Size(600, 30);
+      this.button3.TabIndex = 6;
+      this.button3.Text = "COPY!";
+      this.button3.UseVisualStyleBackColor = true;
+      this.button3.Click += new EventHandler(this.button3_Click);
+      this.label1.AutoSize = true;
+      this.label1.Location = new Point(12, 41);
+      this.label1.Name = "label1";
+      this.label1.Size = new Size(44, 13);
+      this.label1.TabIndex = 7;
+      this.label1.Text = "Source:";
+      this.label2.AutoSize = true;
+      this.label2.Location = new Point(171, 41);
+      this.label2.Name = "label2";
+      this.label2.Size = new Size(46, 13);
+      this.label2.TabIndex = 8;
+      this.label2.Text = "Options:";
+      this.label3.AutoSize = true;
+      this.label3.Location = new Point(431, 41);
+      this.label3.Name = "label3";
+      this.label3.Size = new Size(63, 13);
+      this.label3.TabIndex = 9;
+      this.label3.Text = "Destination:";
+      this.AutoScaleDimensions = new SizeF(6f, 13f);
+      this.AutoScaleMode = AutoScaleMode.Font;
+      this.ClientSize = new Size(624, 639);
+      this.Controls.Add((Control) this.label3);
+      this.Controls.Add((Control) this.label2);
+      this.Controls.Add((Control) this.label1);
+      this.Controls.Add((Control) this.button3);
+      this.Controls.Add((Control) this.lb_slaves);
+      this.Controls.Add((Control) this.lb_keys);
+      this.Controls.Add((Control) this.lb_sessions);
+      this.Controls.Add((Control) this.textBox1);
+      this.Controls.Add((Control) this.button1);
+      this.Name = nameof (Form1);
+      this.Text = "PuTTY Session Copier 1.0";
+      this.ResumeLayout(false);
+      this.PerformLayout();
+    }
+  }
+}
